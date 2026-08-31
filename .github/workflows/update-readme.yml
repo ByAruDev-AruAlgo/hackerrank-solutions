@@ -1,0 +1,109 @@
+name: Update README
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update README
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          # File extension → display name + emoji
+          languages = {
+              ".py": ("Python"),
+              ".js": ("JavaScript"),
+              ".html": ("HTML"),
+              ".css": ("CSS"),
+              ".sql": ("SQL"),
+              ".cpp": ("C++"),
+              ".java": ("Java"),
+              ".c": ("C"),
+              ".cs": ("C#"),
+              ".go": ("Go"),
+              ".rs": ("Rust"),
+              ".php": ("PHP"),
+              ".rb": ("Ruby")
+          }
+
+          counts = {name: 0 for _, (name, _) in languages.items()}
+
+          # Count solution files
+          for file in Path(".").rglob("*"):
+              if not file.is_file():
+                  continue
+
+              # Ignore GitHub/system files
+              if ".git" in file.parts:
+                  continue
+
+              if file.suffix.lower() in languages:
+                  name, _ = languages[file.suffix.lower()]
+                  counts[name] += 1
+
+          total = sum(counts.values())
+
+          # Build Progress section
+          progress = "## Progress\n\n"
+
+          for extension, (name, emoji) in languages.items():
+              if counts[name] > 0:
+                  progress += f"- {emoji} {name}: **{counts[name]}**\n"
+
+          progress += f"- Total: **{total}**"
+
+          # Update README
+          readme_path = Path("README.md")
+          readme = readme_path.read_text()
+
+          readme = re.sub(
+              r"## Progress.*?(?=\n## |\Z)",
+              progress,
+              readme,
+              flags=re.S
+          )
+
+          # Languages currently used
+          active_languages = [
+              name
+              for name, count in counts.items()
+              if count > 0
+          ]
+
+          language_text = (
+              "Languages: " + " • ".join(active_languages)
+              if active_languages
+              else "Languages: None yet"
+          )
+
+          readme = re.sub(
+              r"Languages:.*",
+              language_text,
+              readme
+          )
+
+          readme_path.write_text(readme)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add README.md
+
+          git diff --cached --quiet || git commit -m "chore: update solution stats"
+          git push
