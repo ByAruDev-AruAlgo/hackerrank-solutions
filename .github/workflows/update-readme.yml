@@ -22,53 +22,54 @@ jobs:
           from pathlib import Path
           import re
 
-          # File extension → display name + emoji
-          languages = {
-              ".py": ("Python"),
-              ".js": ("JavaScript"),
-              ".html": ("HTML"),
-              ".css": ("CSS"),
-              ".sql": ("SQL"),
-              ".cpp": ("C++"),
-              ".java": ("Java"),
-              ".c": ("C"),
-              ".cs": ("C#"),
-              ".go": ("Go"),
-              ".rs": ("Rust"),
-              ".php": ("PHP"),
-              ".rb": ("Ruby")
-          }
+          # Language folders
+          languages = [
+              "Python",
+              "JavaScript",
+              "HTML",
+              "CSS",
+              "SQL",
+              "C++",
+              "Java",
+              "C",
+              "C#",
+              "Go",
+              "Rust",
+              "PHP",
+              "Ruby"
+          ]
 
-          counts = {name: 0 for _, (name, _) in languages.items()}
+          counts = {}
 
-          # Count solution files
-          for file in Path(".").rglob("*"):
-              if not file.is_file():
-                  continue
+          # Each immediate subfolder = one solved problem
+          for language in languages:
+              path = Path(language)
 
-              # Ignore GitHub/system files
-              if ".git" in file.parts:
-                  continue
-
-              if file.suffix.lower() in languages:
-                  name, _ = languages[file.suffix.lower()]
-                  counts[name] += 1
+              if path.exists() and path.is_dir():
+                  counts[language] = sum(
+                      1
+                      for item in path.iterdir()
+                      if item.is_dir() and not item.name.startswith(".")
+                  )
+              else:
+                  counts[language] = 0
 
           total = sum(counts.values())
 
           # Build Progress section
           progress = "## Progress\n\n"
 
-          for extension, (name, emoji) in languages.items():
-              if counts[name] > 0:
-                  progress += f"- {emoji} {name}: **{counts[name]}**\n"
+          for language in languages:
+              if counts[language] > 0:
+                  progress += f"- {language}: **{counts[language]}**\n"
 
           progress += f"- Total: **{total}**"
 
-          # Update README
+          # Read README
           readme_path = Path("README.md")
           readme = readme_path.read_text()
 
+          # Replace Progress section
           readme = re.sub(
               r"## Progress.*?(?=\n## |\Z)",
               progress,
@@ -76,11 +77,11 @@ jobs:
               flags=re.S
           )
 
-          # Languages currently used
+          # Active languages
           active_languages = [
-              name
-              for name, count in counts.items()
-              if count > 0
+              language
+              for language in languages
+              if counts[language] > 0
           ]
 
           language_text = (
@@ -89,6 +90,7 @@ jobs:
               else "Languages: None yet"
           )
 
+          # Replace Languages line
           readme = re.sub(
               r"Languages:.*",
               language_text,
