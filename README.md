@@ -4,4 +4,5 @@ My solutions to HackerRank challenges.
 
 ## Progress
 
-- Total: **0**
+- Python: **1**
+- Total: **1**
