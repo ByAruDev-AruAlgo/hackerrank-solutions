@@ -1,4 +1,5 @@
 **Task**
+
 Given an integer, n, perform the following conditional actions:
 
 - If n is odd, print  `Weird `
@@ -7,49 +8,47 @@ Given an integer, n, perform the following conditional actions:
 - If n is even and greater than 20, print  `Not Weird `
 
 **Input Format**
+
 A single line containing a positive integer, n.
 
 **Constraints**
+
 - 1 $\leq$ n $\leq$ 100
 
 **Output Format**
+
 Print  `Weird ` if the number is weird. Otherwise, print  `Not Weird `.
 
 **Sample Input 0**
+
 ```python
 3
 ```
 
 **Sample Output 0**
+
 ```python
 Weird
 ```
 
 **Explanation 0**
+
 n = 3
 n is odd and odd numbers are weird, so print `Weird`.
 
 **Sample Input 1**
+
 ```python
 24
 ```
 
 **Sample Output 1**
+
 ```python
 Not Weird
 ```
 
 **Explanation 1**
+
 n = 24
 n $\ge$ 20 and n is even, so it is not weird.
-
-
-
-
-
-
-
-
-
-
-
